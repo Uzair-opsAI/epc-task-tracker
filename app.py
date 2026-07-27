@@ -2,6 +2,7 @@ import streamlit as st
 from database import get_tasks
 from database import get_projects
 from database import get_employees
+from pages.activity_manager import show as activity_page
 # -------------------------------------------------
 # Page Configuration
 # -------------------------------------------------
@@ -100,10 +101,7 @@ if page == "🏠 Dashboard":
 # -------------------------------------------------
 elif page == "📋 Tasks":
 
-    st.title("📋 Task Management")
-
-    st.info("Coming in Module 3")
-
+    activity_page()
 # -------------------------------------------------
 # ANALYTICS
 # -------------------------------------------------
