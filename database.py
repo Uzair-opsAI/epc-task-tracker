@@ -80,3 +80,31 @@ def get_employees():
     data = worksheet.get_all_records()
 
     return pd.DataFrame(data)
+from datetime import datetime
+
+# ----------------------------------------------------
+# Add New Activity
+# ----------------------------------------------------
+
+def add_activity(activity):
+
+    sheet = open_sheet()
+
+    worksheet = sheet.worksheet("Tasks")
+
+    worksheet.append_row([
+        activity["Activity_ID"],
+        activity["Activity_Name"],
+        activity["Project"],
+        activity["Category"],
+        activity["Discipline"],
+        activity["Lead"],
+        activity["Assigned_To"],
+        activity["Priority"],
+        activity["Planned_Start"],
+        activity["Planned_Finish"],
+        activity["Progress"],
+        activity["Status"],
+        activity["Remarks"],
+        datetime.now().strftime("%d-%b-%Y %H:%M")
+    ])
