@@ -1,0 +1,82 @@
+import streamlit as st
+import gspread
+import pandas as pd
+from google.oauth2.service_account import Credentials
+
+# ----------------------------------------------------
+# Google Sheets Connection
+# ----------------------------------------------------
+
+SCOPES = [
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/drive"
+]
+
+
+@st.cache_resource
+def connect_google_sheet():
+
+    credentials = Credentials.from_service_account_info(
+        st.secrets["gcp_service_account"],
+        scopes=SCOPES
+    )
+
+    client = gspread.authorize(credentials)
+
+    return client
+
+
+# ----------------------------------------------------
+# Open Spreadsheet
+# ----------------------------------------------------
+
+def open_sheet(sheet_name="EPC Task Tracker"):
+
+    client = connect_google_sheet()
+
+    return client.open(sheet_name)
+
+
+# ----------------------------------------------------
+# Read Tasks
+# ----------------------------------------------------
+
+def get_tasks():
+
+    sheet = open_sheet()
+
+    worksheet = sheet.worksheet("Tasks")
+
+    data = worksheet.get_all_records()
+
+    return pd.DataFrame(data)
+
+
+# ----------------------------------------------------
+# Read Projects
+# ----------------------------------------------------
+
+def get_projects():
+
+    sheet = open_sheet()
+
+    worksheet = sheet.worksheet("Projects")
+
+    data = worksheet.get_all_records()
+
+    return pd.DataFrame(data)
+
+
+# ----------------------------------------------------
+# Read Employees
+# ----------------------------------------------------
+
+def get_employees():
+
+    sheet = open_sheet()
+
+    worksheet = sheet.worksheet("Employees")
+
+    data = worksheet.get_all_records()
+
+    return pd.DataFrame(data)
