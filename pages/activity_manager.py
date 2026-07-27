@@ -1,16 +1,101 @@
 import streamlit as st
-from database import get_tasks
+from database import get_tasks, add_activity
 
 def show():
 
     st.title("📋 Activity Manager")
 
-    st.markdown("---")
+    tab1, tab2 = st.tabs(["📄 Activities", "➕ Add Activity"])
 
-    tasks = get_tasks()
+    with tab1:
 
-    st.dataframe(
-        tasks,
-        use_container_width=True,
-        hide_index=True
-    )
+        tasks = get_tasks()
+
+        st.dataframe(
+            tasks,
+            use_container_width=True,
+            hide_index=True
+        )
+
+    with tab2:
+
+        st.subheader("Add New Activity")
+
+        activity_id = st.text_input("Activity ID")
+
+        activity_name = st.text_input("Activity Name")
+
+        project = st.text_input("Project")
+
+        category = st.text_input("Category")
+
+        discipline = st.selectbox(
+            "Discipline",
+            [
+                "Electrical",
+                "Mechanical",
+                "Civil",
+                "Instrumentation",
+                "Process"
+            ]
+        )
+
+        lead = st.text_input("Lead")
+
+        assigned = st.text_input("Assigned To")
+
+        priority = st.selectbox(
+            "Priority",
+            [
+                "Critical",
+                "High",
+                "Medium",
+                "Low"
+            ]
+        )
+
+        start = st.date_input("Planned Start")
+
+        finish = st.date_input("Planned Finish")
+
+        progress = st.slider(
+            "Progress",
+            0,
+            100,
+            0
+        )
+
+        status = st.selectbox(
+            "Status",
+            [
+                "Not Started",
+                "In Progress",
+                "Waiting for Review",
+                "Completed",
+                "On Hold"
+            ]
+        )
+
+        remarks = st.text_area("Remarks")
+
+        if st.button("💾 Save Activity"):
+
+            add_activity({
+                "Activity_ID": activity_id,
+                "Activity_Name": activity_name,
+                "Project": project,
+                "Category": category,
+                "Discipline": discipline,
+                "Lead": lead,
+                "Assigned_To": assigned,
+                "Priority": priority,
+                "Planned_Start": str(start),
+                "Planned_Finish": str(finish),
+                "Progress": progress,
+                "Status": status,
+                "Remarks": remarks
+            })
+
+            st.success("Activity Added Successfully!")
+
+            st.rerun()
