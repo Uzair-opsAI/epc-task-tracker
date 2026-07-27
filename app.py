@@ -75,12 +75,25 @@ if page == "🏠 Dashboard":
     st.markdown("---")
 
     c1, c2, c3, c4 = st.columns(4)
+    tasks = get_tasks()
 
+    completed = len(tasks[tasks["Status"] == "Completed"])
+    progress = len(tasks[tasks["Status"] == "In Progress"])
+    overdue = len(tasks[tasks["Status"] == "Overdue"])
+
+    c1.metric("📋 Total Tasks", len(tasks))
+    c2.metric("🟢 Completed", completed)
+    c3.metric("🟡 In Progress", progress)
+    c4.metric("🔴 Overdue", overdue)
     st.markdown("---")
 
     st.subheader("Task List")
 
-    st.info("Google Sheet will be connected in Module 2.")
+    st.dataframe(
+        tasks,
+        use_container_width=True,
+        hide_index=True
+    )
 
 # -------------------------------------------------
 # TASKS
