@@ -1,30 +1,136 @@
-
 import streamlit as st
-import pandas as pd
 
-st.set_page_config(page_title="EPC Task Tracker", layout="wide")
+# -------------------------------------------------
+# Page Configuration
+# -------------------------------------------------
+st.set_page_config(
+    page_title="Kent EPC Tracker",
+    page_icon="📋",
+    layout="wide"
+)
 
-st.title("📋 EPC Task Tracker (Starter)")
-st.info("Next step: connect Google Sheets. This starter verifies your Streamlit deployment.")
+# -------------------------------------------------
+# Sidebar
+# -------------------------------------------------
+st.sidebar.title("📋 Kent EPC Tracker")
 
-@st.cache_data
-def load_demo():
-    return pd.DataFrame([
-        {"Task_ID":1,"Task_Name":"Cable Schedule Review","Assigned_To":"Zulfiqar","Office":"Vadodara","Status":"In Progress"},
-        {"Task_ID":2,"Task_Name":"Lighting Calculation","Assigned_To":"Rahul","Office":"Mumbai","Status":"Not Started"},
-        {"Task_ID":3,"Task_Name":"Panel Datasheet","Assigned_To":"Amit","Office":"Mumbai","Status":"Completed"},
-    ])
+page = st.sidebar.radio(
+    "Navigation",
+    [
+        "🏠 Dashboard",
+        "📋 Tasks",
+        "📊 Analytics",
+        "⚙ Settings",
+        "ℹ About"
+    ]
+)
 
-df=load_demo()
+# -------------------------------------------------
+# DASHBOARD
+# -------------------------------------------------
+if page == "🏠 Dashboard":
 
-c1,c2,c3=st.columns(3)
-c1.metric("Total Tasks",len(df))
-c2.metric("Completed",(df["Status"]=="Completed").sum())
-c3.metric("In Progress",(df["Status"]=="In Progress").sum())
+    st.title("🏗 Kent EPC Project Tracker")
 
-office=st.selectbox("Office",["All"]+sorted(df["Office"].unique().tolist()))
-if office!="All":
-    df=df[df["Office"]==office]
-st.dataframe(df,use_container_width=True)
+    st.markdown("---")
 
-st.success("Deployment successful. In the next step you'll replace this demo data with live Google Sheets.")
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        project = st.selectbox(
+            "Project",
+            [
+                "BP - Duqm Refinery",
+                "Shell",
+                "Reliance",
+                "ONGC"
+            ]
+        )
+
+    with col2:
+        office = st.selectbox(
+            "Office",
+            [
+                "All",
+                "Vadodara",
+                "Mumbai"
+            ]
+        )
+
+    with col3:
+        discipline = st.selectbox(
+            "Discipline",
+            [
+                "All",
+                "Electrical",
+                "Mechanical",
+                "Civil",
+                "Instrumentation",
+                "Process"
+            ]
+        )
+
+    st.markdown("---")
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric("📋 Total Tasks", "0")
+    c2.metric("🟢 Completed", "0")
+    c3.metric("🟡 In Progress", "0")
+    c4.metric("🔴 Overdue", "0")
+
+    st.markdown("---")
+
+    st.subheader("Task List")
+
+    st.info("Google Sheet will be connected in Module 2.")
+
+# -------------------------------------------------
+# TASKS
+# -------------------------------------------------
+elif page == "📋 Tasks":
+
+    st.title("📋 Task Management")
+
+    st.info("Coming in Module 3")
+
+# -------------------------------------------------
+# ANALYTICS
+# -------------------------------------------------
+elif page == "📊 Analytics":
+
+    st.title("📊 Analytics")
+
+    st.info("Coming in Module 4")
+
+# -------------------------------------------------
+# SETTINGS
+# -------------------------------------------------
+elif page == "⚙ Settings":
+
+    st.title("Settings")
+
+    st.info("Coming in Module 5")
+
+# -------------------------------------------------
+# ABOUT
+# -------------------------------------------------
+elif page == "ℹ About":
+
+    st.title("About")
+
+    st.write("""
+    **Kent EPC Project Tracker**
+
+    Version 1.0
+
+    Developed using
+
+    - Streamlit
+
+    - Google Sheets
+
+    - GitHub
+
+    Designed for collaborative EPC project tracking.
+    """)
