@@ -76,11 +76,6 @@ if page == "🏠 Dashboard":
 
     c1, c2, c3, c4 = st.columns(4)
 
-    c1.metric("📋 Total Tasks", "0")
-    c2.metric("🟢 Completed", "0")
-    c3.metric("🟡 In Progress", "0")
-    c4.metric("🔴 Overdue", "0")
-
     st.markdown("---")
 
     st.subheader("Task List")
