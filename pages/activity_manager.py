@@ -1,5 +1,10 @@
 import streamlit as st
-from database import get_tasks, add_activity
+from database import (
+    get_tasks,
+    add_activity,
+    get_project_names,
+    get_employee_names
+)
 
 def show():
 
@@ -25,7 +30,10 @@ def show():
 
         activity_name = st.text_input("Activity Name")
 
-        project = st.text_input("Project")
+        project = st.selectbox(
+            "Project",
+            get_project_names()
+        )
 
         category = st.text_input("Category")
 
@@ -40,9 +48,15 @@ def show():
             ]
         )
 
-        lead = st.text_input("Lead")
+        lead = st.selectbox(
+            "Lead",
+            get_employee_names()
+        )
 
-        assigned = st.text_input("Assigned To")
+        assigned = st.selectbox(
+            "Assigned To",
+            get_employee_names()
+        )
 
         priority = st.selectbox(
             "Priority",
