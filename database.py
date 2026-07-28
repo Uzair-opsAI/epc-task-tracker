@@ -1,6 +1,7 @@
 import streamlit as st
 import gspread
 import pandas as pd
+from datetime import datetime
 from google.oauth2.service_account import Credentials
 
 # ----------------------------------------------------
@@ -80,7 +81,6 @@ def get_employees():
     data = worksheet.get_all_records()
 
     return pd.DataFrame(data)
-from datetime import datetime
 
 # ----------------------------------------------------
 # Add New Activity
