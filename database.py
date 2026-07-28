@@ -108,3 +108,24 @@ def add_activity(activity):
         activity["Remarks"],
         datetime.now().strftime("%d-%b-%Y %H:%M")
     ])
+
+# ----------------------------------------------------
+# Get Project Names
+# ----------------------------------------------------
+
+def get_project_names():
+
+    projects = get_projects()
+
+    return projects["Project"].tolist()
+
+
+# ----------------------------------------------------
+# Get Employee Names
+# ----------------------------------------------------
+
+def get_employee_names():
+
+    employees = get_employees()
+
+    return employees["Employee"].tolist()
