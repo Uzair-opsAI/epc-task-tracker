@@ -42,6 +42,7 @@ def open_sheet(sheet_name="EPC Task Tracker"):
 # Read Tasks
 # ----------------------------------------------------
 
+@st.cache_data(ttl=30)
 def get_tasks():
 
     sheet = open_sheet()
@@ -56,7 +57,7 @@ def get_tasks():
 # ----------------------------------------------------
 # Read Projects
 # ----------------------------------------------------
-
+@st.cache_data(ttl=30)
 def get_projects():
 
     sheet = open_sheet()
@@ -71,7 +72,7 @@ def get_projects():
 # ----------------------------------------------------
 # Read Employees
 # ----------------------------------------------------
-
+@st.cache_data(ttl=30)
 def get_employees():
 
     sheet = open_sheet()
@@ -85,7 +86,7 @@ def get_employees():
 # ----------------------------------------------------
 # Add New Activity
 # ----------------------------------------------------
-
+@st.cache_data(ttl=30)
 def add_activity(activity):
 
     sheet = open_sheet()
@@ -112,7 +113,7 @@ def add_activity(activity):
 # ----------------------------------------------------
 # Get Project Names
 # ----------------------------------------------------
-
+@st.cache_data(ttl=30)
 def get_project_names():
 
     projects = get_projects()
@@ -123,7 +124,7 @@ def get_project_names():
 # ----------------------------------------------------
 # Get Employee Names
 # ----------------------------------------------------
-
+@st.cache_data(ttl=30)
 def get_employee_names():
 
     employees = get_employees()
