@@ -3,7 +3,13 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from components.styles import load_css
-
+from components.metrics import (
+    metric_card,
+    success_card,
+    warning_card,
+    danger_card,
+    info_card
+)
 from datetime import datetime, timedelta
 
 from database import (
@@ -15,7 +21,32 @@ from database import (
 
 def show():
     load_css()
-    st.title("🏗 Kent EPC Executive Dashboard")
+    st.markdown(
+        """
+        <div class="main-title">
+            Kent EPC Project Tracker
+        </div>
+    
+        <div class="sub-title">
+            Executive Project Controls Dashboard
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    col1, col2, col3 = st.columns([2, 2, 1])
+
+    with col1:
+        st.info("🏗 Engineering Projects")
+    
+    with col2:
+        st.success("🟢 Google Sheets Connected")
+    
+    with col3:
+        st.caption(
+            f"Last Refresh\n\n{datetime.now().strftime('%H:%M:%S')}"
+        )
+    
+    st.divider()
 
     tasks = get_tasks()
     projects = get_projects()
@@ -185,47 +216,68 @@ def show():
     # KPI Cards
     # --------------------------------------------------
 
-    st.subheader("📈 Project KPIs")
+    st.subheader("📈 Executive KPI Dashboard")
 
     row1 = st.columns(3)
-
-    row1[0].metric(
-        "📋 Total Activities",
-        total
-    )
-
-    row1[1].metric(
-        "🟢 Completed",
-        completed
-    )
-
-    row1[2].metric(
-        "🟡 In Progress",
-        in_progress
-    )
-
+    
+    with row1[0]:
+    
+        info_card(
+            "Total Activities",
+            total
+        )
+    
+    with row1[1]:
+    
+        success_card(
+            "Completed",
+            completed
+        )
+    
+    with row1[2]:
+    
+        warning_card(
+            "In Progress",
+            in_progress
+        )
+    
     row2 = st.columns(3)
-
-    row2[0].metric(
-        "⚪ Not Started",
-        not_started
+    
+    with row2[0]:
+    
+        metric_card(
+            "Not Started",
+            not_started,
+            icon="⚪",
+            color="#9CA3AF",
+            subtitle="Pending activities"
+        )
+    
+    with row2[1]:
+    
+        danger_card(
+            "Overdue",
+            overdue
+        )
+    
+    with row2[2]:
+    
+        metric_card(
+            "Due This Week",
+            due_week,
+            icon="📅",
+            color="#F97316",
+            subtitle="Upcoming deadlines"
+        )
+    
+    metric_card(
+        "Average Progress",
+        f"{avg_progress:.0f}%",
+        icon="📈",
+        color="#2563EB",
+        subtitle="Across all filtered activities"
     )
-
-    row2[1].metric(
-        "🔴 Overdue",
-        overdue
-    )
-
-    row2[2].metric(
-        "🟠 Due This Week",
-        due_week
-    )
-
-    st.metric(
-        "📊 Average Progress",
-        f"{avg_progress:.0f}%"
-    )
-
+    
     st.divider()
 
     # --------------------------------------------------
