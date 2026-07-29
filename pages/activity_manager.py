@@ -1,4 +1,5 @@
 import streamlit as st
+from components.styles import load_css
 from database import (
     get_tasks,
     add_activity,
@@ -11,7 +12,7 @@ PRIORITIES = ["Critical","High","Medium","Low"]
 STATUS = ["Not Started","In Progress","Waiting for Review","Completed","On Hold"]
 
 def show():
-
+    load_css()
     st.title("📋 Activity Manager")
 
     tab1, tab2 = st.tabs(["📄 Activities","➕ Add Activity"])
