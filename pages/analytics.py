@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+from components.styles import load_css
 import plotly.graph_objects as go
 from datetime import datetime, timedelta
 
@@ -8,7 +9,7 @@ from database import get_tasks
 
 
 def show():
-
+    load_css()
     st.title("📊 Analytics Dashboard")
 
     tasks = get_tasks()
