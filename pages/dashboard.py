@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from components.styles import load_css
 
 from datetime import datetime, timedelta
 
@@ -13,7 +14,7 @@ from database import (
 
 
 def show():
-
+    load_css()
     st.title("🏗 Kent EPC Executive Dashboard")
 
     tasks = get_tasks()
