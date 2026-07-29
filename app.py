@@ -128,14 +128,6 @@ if page == "🏠 Dashboard":
     )
     st.markdown("---")
 
-    st.subheader("Task List")
-
-    st.dataframe(
-        tasks,
-        use_container_width=True,
-        hide_index=True
-    )
-
 # -------------------------------------------------
 # TASKS
 # -------------------------------------------------
