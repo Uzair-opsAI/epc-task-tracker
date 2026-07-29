@@ -86,7 +86,6 @@ def get_employees():
 # ----------------------------------------------------
 # Add New Activity
 # ----------------------------------------------------
-@st.cache_data(ttl=30)
 def add_activity(activity):
 
     sheet = open_sheet()
