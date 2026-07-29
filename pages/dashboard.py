@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from components.styles import load_css
+from components.cards import dashboard_card
 from components.metrics import (
     metric_card,
     success_card,
@@ -281,67 +282,94 @@ def show():
     st.divider()
 
     # --------------------------------------------------
-    # Project Progress Gauge
+    # Executive Dashboard Widgets
     # --------------------------------------------------
-
-    left, right = st.columns([1,1])
-
+    
+    left, right = st.columns(2)
+    
+    # ==================================================
+    # Overall Progress
+    # ==================================================
+    
     with left:
-
-        fig = go.Figure(
-            go.Indicator(
-                mode="gauge+number",
-                value=avg_progress,
-                title={
-                    "text":"Overall Progress"
-                },
-                gauge={
-                    "axis":{
-                        "range":[0,100]
+    
+        with dashboard_card(
+            title="Overall Progress",
+            icon="🎯",
+            subtitle="Average completion across all activities"
+        ):
+    
+            fig = go.Figure(
+                go.Indicator(
+                    mode="gauge+number",
+                    value=avg_progress,
+                    title={
+                        "text": "Overall Progress"
+                    },
+                    gauge={
+                        "axis": {
+                            "range": [0, 100]
+                        }
                     }
-                }
+                )
             )
-        )
-
-        fig.update_layout(
-            height=360
-        )
-
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
-
+    
+            fig.update_layout(
+                height=340,
+                margin=dict(l=20, r=20, t=40, b=20)
+            )
+    
+            st.plotly_chart(
+                fig,
+                use_container_width=True
+            )
+    
+    # ==================================================
+    # Activity Status
+    # ==================================================
+    
     with right:
-
-        status_count = (
-            filtered["Status"]
-            .value_counts()
-            .reset_index()
-        )
-
-        status_count.columns = [
-            "Status",
-            "Activities"
-        ]
-
-        fig = px.pie(
-            status_count,
-            values="Activities",
-            names="Status",
-            hole=0.50,
-            title="Activity Status Distribution"
-        )
-
-        fig.update_layout(
-            height=360
-        )
-
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
-
+    
+        with dashboard_card(
+            title="Activity Status",
+            icon="📊",
+            subtitle="Current status distribution"
+        ):
+    
+            status_count = (
+                filtered["Status"]
+                .value_counts()
+                .reset_index()
+            )
+    
+            status_count.columns = [
+                "Status",
+                "Activities"
+            ]
+    
+            fig = px.pie(
+                status_count,
+                values="Activities",
+                names="Status",
+                hole=0.45
+            )
+    
+            fig.update_traces(
+                textposition="inside",
+                textinfo="percent+label"
+            )
+    
+            fig.update_layout(
+                height=340,
+                showlegend=True,
+                margin=dict(l=20, r=20, t=20, b=20)
+            )
+    
+            st.plotly_chart(
+                fig,
+                use_container_width=True
+            )
+    
     st.divider()
 
     # --------------------------------------------------
