@@ -109,7 +109,7 @@ def add_activity(activity):
         activity["Remarks"],
         datetime.now().strftime("%d-%b-%Y %H:%M")
     ])
-
+    get_tasks.clear()
 # ----------------------------------------------------
 # Get Project Names
 # ----------------------------------------------------
