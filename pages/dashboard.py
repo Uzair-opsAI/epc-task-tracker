@@ -3,7 +3,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from components.styles import load_css
-from components.cards import dashboard_card
 from components.metrics import (
     metric_card,
     success_card,
