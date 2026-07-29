@@ -1,11 +1,11 @@
 import streamlit as st
-
+from components.theme import *
 
 def metric_card(
     title,
     value,
     icon="📊",
-    color="#0E6FFF",
+    color=PRIMARY,
     subtitle=""
 ):
     """
@@ -74,7 +74,7 @@ def success_card(title, value):
         title,
         value,
         "🟢",
-        "#16a34a"
+        SUCCESS
     )
 
 
@@ -84,7 +84,7 @@ def warning_card(title, value):
         title,
         value,
         "🟡",
-        "#f59e0b"
+        WARNING
     )
 
 
@@ -94,7 +94,7 @@ def danger_card(title, value):
         title,
         value,
         "🔴",
-        "#dc2626"
+        DANGER
     )
 
 
@@ -104,5 +104,5 @@ def info_card(title, value):
         title,
         value,
         "🔵",
-        "#2563eb"
+        INFO
     )
