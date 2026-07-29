@@ -386,34 +386,34 @@ def show():
             subtitle="Activities by engineering discipline"
         ):
 
-        discipline = (
-            filtered["Discipline"]
-            .value_counts()
-            .reset_index()
-        )
-
-        discipline.columns = [
-            "Discipline",
-            "Activities"
-        ]
-
-        fig = px.bar(
-            discipline,
-            x="Discipline",
-            y="Activities",
-            color="Activities",
-            text="Activities",
-            title="Activities by Discipline"
-        )
-
-        fig.update_layout(
-            height=420
-        )
-
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
+            discipline = (
+                filtered["Discipline"]
+                .value_counts()
+                .reset_index()
+            )
+    
+            discipline.columns = [
+                "Discipline",
+                "Activities"
+            ]
+    
+            fig = px.bar(
+                discipline,
+                x="Discipline",
+                y="Activities",
+                color="Activities",
+                text="Activities",
+                title="Activities by Discipline"
+            )
+    
+            fig.update_layout(
+                height=420
+            )
+    
+            st.plotly_chart(
+                fig,
+                use_container_width=True
+            )
 
     with col2:
 
@@ -423,34 +423,34 @@ def show():
             subtitle="Priority level of all activities"
         ):
 
-        priority = (
-            filtered["Priority"]
-            .value_counts()
-            .reset_index()
-        )
-
-        priority.columns = [
-            "Priority",
-            "Activities"
-        ]
-
-        fig = px.bar(
-            priority,
-            x="Priority",
-            y="Activities",
-            color="Activities",
-            text="Activities",
-            title="Priority Distribution"
-        )
-
-        fig.update_layout(
-            height=420
-        )
-
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
+            priority = (
+                filtered["Priority"]
+                .value_counts()
+                .reset_index()
+            )
+    
+            priority.columns = [
+                "Priority",
+                "Activities"
+            ]
+    
+            fig = px.bar(
+                priority,
+                x="Priority",
+                y="Activities",
+                color="Activities",
+                text="Activities",
+                title="Priority Distribution"
+            )
+    
+            fig.update_layout(
+                height=420
+            )
+    
+            st.plotly_chart(
+                fig,
+                use_container_width=True
+            )
 
     st.divider()
       # --------------------------------------------------
