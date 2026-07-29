@@ -128,6 +128,29 @@ if page == "🏠 Dashboard":
     )
     st.markdown("---")
 
+    st.subheader("📅 Activities Due in the Next 7 Days")
+    
+    upcoming = tasks[
+        (tasks["Planned Finish"] >= today) &
+        (tasks["Planned Finish"] <= next_week)
+    ]
+    
+    if upcoming.empty:
+        st.success("No activities due in the next 7 days.")
+    else:
+        st.dataframe(
+            upcoming[
+                [
+                    "Activity ID",
+                    "Activity Name",
+                    "Assigned To",
+                    "Planned Finish",
+                    "Status"
+                ]
+            ],
+            use_container_width=True,
+            hide_index=True
+        )
 # -------------------------------------------------
 # TASKS
 # -------------------------------------------------
