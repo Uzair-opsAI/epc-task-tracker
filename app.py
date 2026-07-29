@@ -1,4 +1,6 @@
 import streamlit as st
+import pandas as pd
+from datetime import datetime, timedelta
 from database import get_tasks
 from database import get_projects
 from database import get_employees
@@ -75,17 +77,55 @@ if page == "🏠 Dashboard":
 
     st.markdown("---")
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3 = st.columns(3)
+    c4, c5, c6 = st.columns(3)
     tasks = get_tasks()
 
     completed = len(tasks[tasks["Status"] == "Completed"])
-    progress = len(tasks[tasks["Status"] == "In Progress"])
-    overdue = len(tasks[tasks["Status"] == "Overdue"])
 
-    c1.metric("📋 Total Tasks", len(tasks))
+    progress = len(tasks[tasks["Status"] == "In Progress"])
+    
+    # Convert Planned Finish column into dates
+    tasks["Planned Finish"] = pd.to_datetime(
+        tasks["Planned Finish"]
+    ).dt.date
+    
+    today = datetime.today().date()
+    
+    # Automatically calculate overdue activities
+    overdue = len(
+        tasks[
+            (tasks["Planned Finish"] < today)
+            &
+            (tasks["Status"] != "Completed")
+        ]
+    )
+    
+    # Activities due within the next 7 days
+    next_week = today + timedelta(days=7)
+    
+    due_this_week = len(
+        tasks[
+            (tasks["Planned Finish"] >= today)
+            &
+            (tasks["Planned Finish"] <= next_week)
+        ]
+    )
+
+    c1.metric("📋 Total Activities", len(tasks))
+
     c2.metric("🟢 Completed", completed)
+    
     c3.metric("🟡 In Progress", progress)
+    
     c4.metric("🔴 Overdue", overdue)
+    
+    c5.metric("🟠 Due This Week", due_this_week)
+    
+    c6.metric(
+        "📈 Average Progress",
+        f"{tasks['Progress'].mean():.0f}%"
+    )
     st.markdown("---")
 
     st.subheader("Task List")
