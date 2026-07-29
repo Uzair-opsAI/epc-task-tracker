@@ -380,6 +380,12 @@ def show():
 
     with col1:
 
+        with dashboard_card(
+            title="Discipline Workload",
+            icon="⚡",
+            subtitle="Activities by engineering discipline"
+        ):
+
         discipline = (
             filtered["Discipline"]
             .value_counts()
@@ -410,6 +416,12 @@ def show():
         )
 
     with col2:
+
+        with dashboard_card(
+            title="Priority Distribution",
+            icon="🚨",
+            subtitle="Priority level of all activities"
+        ):
 
         priority = (
             filtered["Priority"]
