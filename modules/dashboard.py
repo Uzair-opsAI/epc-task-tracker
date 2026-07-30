@@ -30,7 +30,7 @@ def show():
     # HEADER
     # =======================================================
 
-    st.title("⚡Kent EPC Project Tracker")
+    st.title("⚡ Kent EPC Project Tracker")
 
     st.caption(
         "Executive Project Controls Dashboard"
