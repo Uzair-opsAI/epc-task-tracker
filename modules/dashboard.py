@@ -591,7 +591,7 @@ def show():
 
     with right:
 
-        st.subheader("🏗 Project Progress")
+        st.subheader("📂 Project Progress")
 
         project_df = (
             filtered.groupby("Project")
