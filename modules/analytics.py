@@ -221,7 +221,8 @@ def show():
         round(
             (overdue / total) * 100,
             1
-         if total
+        )
+        if total
         else 0
     )
         # ========================================================
