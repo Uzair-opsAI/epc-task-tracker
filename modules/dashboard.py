@@ -5,23 +5,18 @@ import plotly.graph_objects as go
 
 from datetime import datetime, timedelta
 
-from database import (
-    get_tasks,
-    get_projects,
-    get_employees
-)
-
+from database import get_tasks
 from components.styles import load_css
 
 
 # ===========================================================
-# DASHBOARD
+# OPERATIONS DASHBOARD
 # ===========================================================
 
 def show():
 
     # =======================================================
-    # Load CSS
+    # LOAD CSS
     # =======================================================
 
     load_css()
@@ -30,23 +25,23 @@ def show():
     # HEADER
     # =======================================================
 
-    st.title("⚡ Kent EPC Project Tracker")
+    st.title("⚡ Operations Dashboard")
 
     st.caption(
-        "Executive Project Controls Dashboard"
+        "Daily Engineering Project Monitoring"
     )
 
-    c1, c2, c3 = st.columns([2,2,1])
+    info1, info2, info3 = st.columns([2,2,1])
 
-    with c1:
+    with info1:
 
-        st.info("🏗 Engineering Projects")
+        st.info("Engineering Project Controls")
 
-    with c2:
+    with info2:
 
-        st.success("🟢 Google Sheets Connected")
+        st.success("Google Sheets Connected")
 
-    with c3:
+    with info3:
 
         st.metric(
             "Refresh",
@@ -63,12 +58,14 @@ def show():
 
     if tasks.empty:
 
-        st.warning("No activities available.")
+        st.warning(
+            "No activities available."
+        )
 
         st.stop()
 
     # =======================================================
-    # CLEAN DATA
+    # DATA CLEANING
     # =======================================================
 
     tasks["Planned Start"] = pd.to_datetime(
@@ -86,7 +83,7 @@ def show():
         errors="coerce"
     ).fillna(0)
 
-    today = pd.Timestamp.today()
+    today = pd.Timestamp.today().normalize()
 
     # =======================================================
     # SIDEBAR FILTERS
@@ -94,7 +91,7 @@ def show():
 
     st.sidebar.header("Dashboard Filters")
 
-    project_filter = st.sidebar.selectbox(
+    project = st.sidebar.selectbox(
         "Project",
         ["All"] +
         sorted(
@@ -105,7 +102,7 @@ def show():
         )
     )
 
-    discipline_filter = st.sidebar.selectbox(
+    discipline = st.sidebar.selectbox(
         "Discipline",
         ["All"] +
         sorted(
@@ -116,7 +113,7 @@ def show():
         )
     )
 
-    status_filter = st.sidebar.selectbox(
+    status = st.sidebar.selectbox(
         "Status",
         ["All"] +
         sorted(
@@ -127,7 +124,7 @@ def show():
         )
     )
 
-    priority_filter = st.sidebar.selectbox(
+    priority = st.sidebar.selectbox(
         "Priority",
         ["All"] +
         sorted(
@@ -148,28 +145,28 @@ def show():
 
     filtered = tasks.copy()
 
-    if project_filter != "All":
+    if project != "All":
 
         filtered = filtered[
-            filtered["Project"] == project_filter
+            filtered["Project"] == project
         ]
 
-    if discipline_filter != "All":
+    if discipline != "All":
 
         filtered = filtered[
-            filtered["Discipline"] == discipline_filter
+            filtered["Discipline"] == discipline
         ]
 
-    if status_filter != "All":
+    if status != "All":
 
         filtered = filtered[
-            filtered["Status"] == status_filter
+            filtered["Status"] == status
         ]
 
-    if priority_filter != "All":
+    if priority != "All":
 
         filtered = filtered[
-            filtered["Priority"] == priority_filter
+            filtered["Priority"] == priority
         ]
 
     if search:
@@ -201,20 +198,18 @@ def show():
         filtered["Status"] == "In Progress"
     ).sum()
 
-    not_started = (
-        filtered["Status"] == "Not Started"
-    ).sum()
-
     overdue = len(
 
         filtered[
-
-            (filtered["Planned Finish"] < today)
-
+            (
+                filtered["Planned Finish"]
+                < today
+            )
             &
-
-            (filtered["Status"] != "Completed")
-
+            (
+                filtered["Status"]
+                != "Completed"
+            )
         ]
 
     )
@@ -222,19 +217,15 @@ def show():
     due_this_week = len(
 
         filtered[
-
-            (filtered["Planned Finish"] >= today)
-
-            &
-
             (
-
                 filtered["Planned Finish"]
-
-                <= today + timedelta(days=7)
-
+                >= today
             )
-
+            &
+            (
+                filtered["Planned Finish"]
+                <= today + timedelta(days=7)
+            )
         ]
 
     )
@@ -246,10 +237,11 @@ def show():
         1
 
     )
+        # =======================================================
+    # OPERATIONS SUMMARY
+    # =======================================================
 
-    # =======================================================
-    # EXECUTIVE KPI SECTION
-    # =======================================================
+    st.subheader("Operations Summary")
 
     # =======================================================
     # KPI ROW 1
@@ -258,24 +250,24 @@ def show():
     row1 = st.columns(3)
 
     with row1[0]:
+
         st.metric(
             label="📋 Total Activities",
-            value=total,
-            delta=None
+            value=f"{total}"
         )
 
     with row1[1]:
+
         st.metric(
-            label="🟢 Completed",
-            value=completed,
-            delta=f"{(completed/total*100):.1f}%"
-            if total else "0%"
+            label="✅ Completed",
+            value=f"{completed}"
         )
 
     with row1[2]:
+
         st.metric(
-            label="🟡 In Progress",
-            value=in_progress
+            label="📈 Average Progress",
+            value=f"{avg_progress:.1f}%"
         )
 
     # =======================================================
@@ -285,119 +277,101 @@ def show():
     row2 = st.columns(3)
 
     with row2[0]:
+
         st.metric(
-            label="⚪ Not Started",
-            value=not_started
+            label="🚨 Overdue",
+            value=f"{overdue}"
         )
 
     with row2[1]:
+
         st.metric(
-            label="🔴 Overdue",
-            value=overdue
+            label="📅 Due This Week",
+            value=f"{due_this_week}"
         )
 
     with row2[2]:
+
         st.metric(
-            label="📅 Due This Week",
-            value=due_this_week
+            label="⚙ In Progress",
+            value=f"{in_progress}"
         )
+
+    st.divider()
+        # =======================================================
+    # PROJECT STATUS OVERVIEW
+    # =======================================================
+
+    st.subheader("Project Status Overview")
+
+    left, right = st.columns(2)
 
     # =======================================================
     # OVERALL PROGRESS
     # =======================================================
 
-    st.metric(
-        label="📈 Average Progress",
-        value=f"{avg_progress:.1f}%"
-    )
-
-    st.divider()
-
-    # =======================================================
-    # EXECUTIVE SNAPSHOT
-    # =======================================================
-
-    snapshot1, snapshot2, snapshot3, snapshot4 = st.columns(4)
-
-    snapshot1.info(
-        f"**Projects**\n\n{filtered['Project'].nunique()}"
-    )
-
-    snapshot2.info(
-        f"**Employees**\n\n{filtered['Assigned To'].nunique()}"
-    )
-
-    snapshot3.info(
-        f"**Disciplines**\n\n{filtered['Discipline'].nunique()}"
-    )
-
-    completion_rate = (
-        completed / total * 100
-        if total else 0
-    )
-
-    snapshot4.info(
-        f"**Completion Rate**\n\n{completion_rate:.1f}%"
-    )
-
-    st.divider()
-
-    # =======================================================
-    # CHART SECTION STARTS HERE
-    # =======================================================
-
-    left, right = st.columns(2)
-        # =======================================================
-    # OVERALL PROGRESS & STATUS DISTRIBUTION
-    # =======================================================
-
     with left:
-
-        st.subheader("🎯 Overall Progress")
 
         fig = go.Figure(
             go.Indicator(
+
                 mode="gauge+number",
+
                 value=avg_progress,
+
                 number={
-                    "suffix": "%"
+                    "suffix":"%"
                 },
+
                 title={
-                    "text": "Average Project Progress"
+                    "text":"Overall Progress"
                 },
+
                 gauge={
-                    "axis": {
-                        "range": [0, 100]
+
+                    "axis":{
+                        "range":[0,100]
                     },
-                    "bar": {
-                        "color": "#1565C0"
+
+                    "bar":{
+                        "color":"#1565C0"
                     },
-                    "steps": [
+
+                    "steps":[
+
                         {
-                            "range": [0, 40],
-                            "color": "#FDECEC"
+                            "range":[0,40],
+                            "color":"#FDECEC"
                         },
+
                         {
-                            "range": [40, 70],
-                            "color": "#FFF7E6"
+                            "range":[40,70],
+                            "color":"#FFF4CC"
                         },
+
                         {
-                            "range": [70, 100],
-                            "color": "#E8F5E9"
+                            "range":[70,100],
+                            "color":"#E8F5E9"
                         }
+
                     ]
+
                 }
+
             )
         )
 
         fig.update_layout(
-            height=380,
+
+            height=360,
+
             margin=dict(
                 l=20,
                 r=20,
-                t=60,
+                t=50,
                 b=20
             )
+
         )
 
         st.plotly_chart(
@@ -411,319 +385,197 @@ def show():
 
     with right:
 
-        st.subheader("📊 Activity Status Distribution")
-
         status_df = (
+
             filtered["Status"]
+
             .value_counts()
+
             .reset_index()
+
         )
 
         status_df.columns = [
+
             "Status",
+
             "Activities"
+
         ]
 
         fig = px.pie(
+
             status_df,
+
             values="Activities",
+
             names="Status",
+
             hole=0.55
+
         )
 
         fig.update_traces(
+
             textposition="inside",
+
             textinfo="percent+label"
+
         )
 
         fig.update_layout(
-            height=380,
-            legend_title="Status",
+
+            title="Activity Status",
+
+            height=360,
+
             margin=dict(
-                l=10,
-                r=10,
-                t=40,
+                l=20,
+                r=20,
+                t=50,
                 b=20
             )
+
         )
 
         st.plotly_chart(
+
             fig,
+
             use_container_width=True
-        )
 
-    st.divider()
-
-        # =======================================================
-    # DISCIPLINE & PRIORITY ANALYSIS
-    # =======================================================
-
-    left, right = st.columns(2)
-
-    with left:
-
-        st.subheader("⚡ Activities by Discipline")
-
-        discipline_df = (
-            filtered.groupby("Discipline")
-            .size()
-            .reset_index(name="Activities")
-            .sort_values("Activities", ascending=False)
-        )
-
-        fig = px.bar(
-            discipline_df,
-            x="Discipline",
-            y="Activities",
-            color="Activities",
-            text="Activities",
-            color_continuous_scale="Blues"
-        )
-
-        fig.update_traces(
-            textposition="outside"
-        )
-
-        fig.update_layout(
-            height=420,
-            showlegend=False,
-            xaxis_title=None,
-            yaxis_title="No. of Activities"
-        )
-
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
-
-    with right:
-
-        st.subheader("🚨 Priority Distribution")
-
-        priority_df = (
-            filtered.groupby("Priority")
-            .size()
-            .reset_index(name="Activities")
-        )
-
-        priority_order = [
-            "Critical",
-            "High",
-            "Medium",
-            "Low"
-        ]
-
-        priority_df["Priority"] = pd.Categorical(
-            priority_df["Priority"],
-            categories=priority_order,
-            ordered=True
-        )
-
-        priority_df = priority_df.sort_values("Priority")
-
-        fig = px.bar(
-            priority_df,
-            x="Priority",
-            y="Activities",
-            color="Priority",
-            text="Activities"
-        )
-
-        fig.update_traces(
-            textposition="outside"
-        )
-
-        fig.update_layout(
-            height=420,
-            showlegend=False,
-            xaxis_title=None,
-            yaxis_title="No. of Activities"
-        )
-
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
-
-    st.divider()
-
-    # =======================================================
-    # EMPLOYEE & PROJECT ANALYSIS
-    # =======================================================
-
-    left, right = st.columns(2)
-
-    with left:
-
-        st.subheader("👷 Employee Workload")
-
-        employee_df = (
-            filtered.groupby("Assigned To")
-            .size()
-            .reset_index(name="Activities")
-            .sort_values("Activities", ascending=False)
-        )
-
-        fig = px.bar(
-            employee_df,
-            x="Assigned To",
-            y="Activities",
-            color="Activities",
-            text="Activities",
-            color_continuous_scale="Viridis"
-        )
-
-        fig.update_traces(
-            textposition="outside"
-        )
-
-        fig.update_layout(
-            height=420,
-            showlegend=False,
-            xaxis_title=None,
-            yaxis_title="Assigned Activities"
-        )
-
-        st.plotly_chart(
-            fig,
-            use_container_width=True
-        )
-
-    with right:
-
-        st.subheader("📂 Project Progress")
-
-        project_df = (
-            filtered.groupby("Project")
-            .agg(
-                Average_Progress=("Progress", "mean"),
-                Total_Activities=("Activity ID", "count")
-            )
-            .reset_index()
-        )
-
-        project_df["Average_Progress"] = (
-            project_df["Average_Progress"]
-            .round(1)
-        )
-
-        fig = px.bar(
-            project_df,
-            x="Project",
-            y="Average_Progress",
-            color="Average_Progress",
-            text="Average_Progress",
-            color_continuous_scale="Greens"
-        )
-
-        fig.update_traces(
-            texttemplate="%{text:.1f}%",
-            textposition="outside"
-        )
-
-        fig.update_layout(
-            height=420,
-            showlegend=False,
-            xaxis_title=None,
-            yaxis_title="Average Progress (%)"
-        )
-
-        st.plotly_chart(
-            fig,
-            use_container_width=True
         )
 
     st.divider()
         # =======================================================
+    # OPERATIONAL ACTION CENTER
+    # =======================================================
+
+    action_left, action_right = st.columns(2)
+
+    # =======================================================
     # ACTIVITIES DUE THIS WEEK
     # =======================================================
 
-    st.subheader("📅 Activities Due This Week")
+    with action_left:
 
-    due_df = filtered[
-        (filtered["Planned Finish"] >= today)
-        &
-        (
-            filtered["Planned Finish"]
-            <= today + timedelta(days=7)
-        )
-    ].copy()
+        st.subheader("📅 Activities Due This Week")
 
-    due_df = due_df.sort_values("Planned Finish")
+        due_df = filtered[
 
-    if due_df.empty:
+            (filtered["Planned Finish"] >= today)
 
-        st.success("✅ No activities are due during the next 7 days.")
+            &
 
-    else:
+            (
+                filtered["Planned Finish"]
+                <= today + timedelta(days=7)
+            )
 
-        st.dataframe(
-            due_df[
-                [
-                    "Activity ID",
-                    "Activity Name",
-                    "Project",
-                    "Assigned To",
-                    "Priority",
-                    "Planned Finish",
-                    "Progress",
-                    "Status"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
+            &
+
+            (
+                filtered["Status"] != "Completed"
+            )
+
+        ].copy()
+
+        due_df = due_df.sort_values(
+            "Planned Finish"
         )
 
-    st.divider()
+        if due_df.empty:
+
+            st.success(
+                "No activities due this week."
+            )
+
+        else:
+
+            st.dataframe(
+
+                due_df[
+                    [
+                        "Activity ID",
+                        "Activity Name",
+                        "Project",
+                        "Assigned To",
+                        "Planned Finish",
+                        "Status"
+                    ]
+                ],
+
+                use_container_width=True,
+
+                hide_index=True
+
+            )
 
     # =======================================================
     # OVERDUE ACTIVITIES
     # =======================================================
 
-    st.subheader("🚨 Overdue Activities")
+    with action_right:
 
-    overdue_df = filtered[
-        (filtered["Planned Finish"] < today)
-        &
-        (filtered["Status"] != "Completed")
-    ].copy()
+        st.subheader("🚨 Overdue Activities")
 
-    overdue_df = overdue_df.sort_values("Planned Finish")
+        overdue_df = filtered[
 
-    if overdue_df.empty:
+            (
+                filtered["Planned Finish"]
+                < today
+            )
 
-        st.success("🎉 No overdue activities.")
+            &
 
-    else:
+            (
+                filtered["Status"]
+                != "Completed"
+            )
 
-        st.warning(
-            f"{len(overdue_df)} overdue activity(s) require attention."
+        ].copy()
+
+        overdue_df = overdue_df.sort_values(
+            "Planned Finish"
         )
 
-        st.dataframe(
-            overdue_df[
-                [
-                    "Activity ID",
-                    "Activity Name",
-                    "Project",
-                    "Assigned To",
-                    "Priority",
-                    "Planned Finish",
-                    "Progress",
-                    "Status"
-                ]
-            ],
-            use_container_width=True,
-            hide_index=True
-        )
+        if overdue_df.empty:
+
+            st.success(
+                "No overdue activities."
+            )
+
+        else:
+
+            st.error(
+                f"{len(overdue_df)} activity(s) require immediate attention."
+            )
+
+            st.dataframe(
+
+                overdue_df[
+                    [
+                        "Activity ID",
+                        "Activity Name",
+                        "Project",
+                        "Assigned To",
+                        "Priority",
+                        "Planned Finish"
+                    ]
+                ],
+
+                use_container_width=True,
+
+                hide_index=True
+
+            )
 
     st.divider()
-
+        # =======================================================
+    # RECENT ACTIVITY FEED
     # =======================================================
-    # RECENT ACTIVITIES
-    # =======================================================
 
-    st.subheader("🕒 Recently Added Activities")
+    st.subheader("🕒 Recent Activity Feed")
 
     if "Created On" in filtered.columns:
 
@@ -740,238 +592,83 @@ def show():
                 "Created On",
                 ascending=False
             )
-            .head(10)
+            .head(8)
         )
 
         st.dataframe(
+
             recent_df[
                 [
                     "Activity ID",
                     "Activity Name",
                     "Project",
                     "Assigned To",
-                    "Created On",
-                    "Status"
+                    "Status",
+                    "Created On"
                 ]
             ],
+
             use_container_width=True,
+
             hide_index=True
+
         )
 
     else:
 
         st.info(
-            "The Google Sheet currently does not contain a 'Created On' column."
+            "Recent activity information is unavailable."
         )
 
     st.divider()
 
     # =======================================================
-    # PROJECT HEALTH SUMMARY
+    # TODAY'S OPERATIONS SUMMARY
     # =======================================================
 
-    st.subheader("📊 Project Health Summary")
+    st.subheader("Today's Operations Summary")
 
-    project_health = (
-        filtered
-        .groupby("Project")
-        .agg(
-            Total_Activities=("Activity ID", "count"),
-            Average_Progress=("Progress", "mean"),
-            Completed=("Status",
-                lambda x: (x == "Completed").sum()),
-            In_Progress=("Status",
-                lambda x: (x == "In Progress").sum()),
-            Overdue=("Status",
-                lambda x: (
-                    (
-                        filtered.loc[x.index, "Planned Finish"] < today
-                    )
-                    &
-                    (x != "Completed")
-                ).sum())
-        )
-        .reset_index()
+    summary = []
+
+    summary.append(
+        f"📋 Total monitored activities: **{total}**"
     )
 
-    project_health["Average_Progress"] = (
-        project_health["Average_Progress"]
-        .round(1)
+    summary.append(
+        f"✅ Completed activities: **{completed}**"
     )
 
-    def get_health(progress):
-
-        if progress >= 80:
-            return "🟢 Healthy"
-
-        elif progress >= 50:
-            return "🟡 Monitor"
-
-        return "🔴 Critical"
-
-    project_health["Health"] = (
-        project_health["Average_Progress"]
-        .apply(get_health)
+    summary.append(
+        f"⚙ Activities currently in progress: **{in_progress}**"
     )
 
-    st.dataframe(
-        project_health,
-        use_container_width=True,
-        hide_index=True
-    )
+    if overdue == 0:
 
-    st.divider()
-        # =======================================================
-    # EXECUTIVE DASHBOARD STATISTICS
-    # =======================================================
-
-    st.subheader("📈 Executive Dashboard Statistics")
-
-    stat1, stat2, stat3, stat4 = st.columns(4)
-
-    completion_rate = (
-        round((completed / total) * 100, 1)
-        if total > 0 else 0
-    )
-
-    overdue_rate = (
-        round((overdue / total) * 100, 1)
-        if total > 0 else 0
-    )
-
-    avg_activities = (
-        round(total / filtered["Project"].nunique(), 1)
-        if filtered["Project"].nunique() > 0 else 0
-    )
-
-    avg_employee_load = (
-        round(total / filtered["Assigned To"].nunique(), 1)
-        if filtered["Assigned To"].nunique() > 0 else 0
-    )
-
-    with stat1:
-
-        st.metric(
-            "Completion Rate",
-            f"{completion_rate}%"
+        summary.append(
+            "🟢 No overdue activities requiring attention."
         )
 
-    with stat2:
+    else:
 
-        st.metric(
-            "Overdue Rate",
-            f"{overdue_rate}%"
+        summary.append(
+            f"🔴 **{overdue}** overdue activities require immediate follow-up."
         )
 
-    with stat3:
+    if due_this_week == 0:
 
-        st.metric(
-            "Avg Activities / Project",
-            avg_activities
+        summary.append(
+            "📅 No activities are due during the next 7 days."
         )
 
-    with stat4:
+    else:
 
-        st.metric(
-            "Avg Employee Load",
-            avg_employee_load
+        summary.append(
+            f"📅 **{due_this_week}** activities are due within the next 7 days."
         )
 
-    st.divider()
+    for item in summary:
 
-    # =======================================================
-    # DATA QUALITY CHECK
-    # =======================================================
-
-    st.subheader("📋 Data Quality Overview")
-
-    dq1, dq2, dq3 = st.columns(3)
-
-    with dq1:
-
-        missing_progress = (
-            filtered["Progress"]
-            .isna()
-            .sum()
-        )
-
-        st.metric(
-            "Missing Progress",
-            missing_progress
-        )
-
-    with dq2:
-
-        missing_assignee = (
-            filtered["Assigned To"]
-            .isna()
-            .sum()
-        )
-
-        st.metric(
-            "Unassigned Activities",
-            missing_assignee
-        )
-
-    with dq3:
-
-        duplicate_ids = (
-            filtered["Activity ID"]
-            .duplicated()
-            .sum()
-        )
-
-        st.metric(
-            "Duplicate Activity IDs",
-            duplicate_ids
-        )
-
-    st.divider()
-
-    # =======================================================
-    # DASHBOARD INFORMATION
-    # =======================================================
-
-    with st.expander("ℹ Dashboard Information", expanded=False):
-
-        st.markdown(
-            """
-### Dashboard Features
-
-This dashboard provides:
-
-- Executive KPI Monitoring
-- Activity Status Overview
-- Discipline Workload Analysis
-- Priority Distribution
-- Employee Workload
-- Project Progress Monitoring
-- Due Activities Tracking
-- Overdue Activity Monitoring
-- Project Health Assessment
-- Executive Statistics
-
----
-
-### Data Source
-
-Google Sheets
-
----
-
-### Refresh Frequency
-
-Live (Every Page Refresh)
-
----
-
-### Developed For
-
-Kent PLC - Electrical Department
-
-Graduate Engineer Digitalisation Project
-"""
-        )
+        st.success(item)
 
     st.divider()
 
@@ -984,11 +681,11 @@ Graduate Engineer Digitalisation Project
     with footer_left:
 
         st.caption(
-            "Kent EPC Project Tracker • Executive Dashboard • Version 2.0"
+            "Kent EPC Project Tracker • Operations Dashboard • Version 3.0"
         )
 
     with footer_right:
 
         st.caption(
-            datetime.now().strftime("%d %b %Y")
+            datetime.now().strftime("%d-%b-%Y")
         )
