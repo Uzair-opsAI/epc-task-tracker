@@ -5,9 +5,9 @@ from datetime import datetime
 # IMPORT PAGES
 # ==========================================================
 
-from pages.dashboard import show as dashboard_page
-from pages.activity_manager import show as activity_page
-from pages.analytics import show as analytics_page
+from modules.dashboard import show as dashboard_page
+from modules.activity_manager import show as activity_page
+from modules.analytics import show as analytics_page
 
 # ==========================================================
 # GLOBAL STYLES
