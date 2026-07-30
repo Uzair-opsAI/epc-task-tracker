@@ -163,7 +163,7 @@ def show():
         ]
 
     )
-        with tab1:
+    with tab1:
 
         st.subheader("📄 Activity Register")
 
@@ -341,7 +341,7 @@ def show():
                 "Employees",
                 filtered["Assigned To"].nunique()
             )
-        with tab2:
+    with tab2:
 
         st.subheader("➕ Add New Activity")
 
@@ -545,7 +545,7 @@ def show():
             )
 
         st.divider()
-                # ======================================================
+        # ======================================================
         # ACTIVITY INSIGHTS
         # ======================================================
 
@@ -638,7 +638,7 @@ def show():
 
             })
 
-                        st.success(
+            st.success(
                 f"""
 ✅ Activity **{activity_id}** has been successfully added.
 
