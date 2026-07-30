@@ -19,18 +19,6 @@ st.set_page_config(
 # -------------------------------------------------
 # Sidebar
 # -------------------------------------------------
-st.sidebar.title("📋 Kent EPC Tracker")
-
-page = st.sidebar.radio(
-    "Navigation",
-    [
-        "🏠 Dashboard",
-        "📋 Tasks",
-        "📊 Analytics",
-        "⚙ Settings",
-        "ℹ About"
-    ]
-)
 
 # -------------------------------------------------
 # DASHBOARD
