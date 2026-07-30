@@ -91,29 +91,6 @@ with st.sidebar:
 
 page = st.session_state.page
 # ==========================================================
-# GLOBAL HEADER
-# ==========================================================
-
-header_left, header_right = st.columns([5, 1])
-
-with header_left:
-
-    st.title("🏗 Kent EPC Project Tracker")
-
-    st.caption(
-        "Executive Project Controls Dashboard"
-    )
-
-with header_right:
-
-    st.metric(
-        "Refresh",
-        datetime.now().strftime("%H:%M")
-    )
-
-st.divider()
-
-# ==========================================================
 # PAGE ROUTER
 # ==========================================================
 
@@ -174,24 +151,4 @@ Developer
 
 Electrical Engineering Digitalisation Initiative
 """
-    )
-
-# ==========================================================
-# FOOTER
-# ==========================================================
-
-st.divider()
-
-footer1, footer2 = st.columns([3, 1])
-
-with footer1:
-
-    st.caption(
-        "Kent PLC • EPC Project Controls Platform • Version 2.0"
-    )
-
-with footer2:
-
-    st.caption(
-        datetime.now().strftime("%d %b %Y")
     )
