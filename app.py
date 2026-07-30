@@ -1,6 +1,19 @@
 import streamlit as st
-from components.styles import load_css
 from datetime import datetime
+
+# ==========================================================
+# IMPORT PAGES
+# ==========================================================
+
+from pages.dashboard import show as dashboard_page
+from pages.activity_manager import show as activity_page
+from pages.analytics import show as analytics_page
+
+# ==========================================================
+# GLOBAL STYLES
+# ==========================================================
+
+from components.styles import load_css
 
 # ==========================================================
 # PAGE CONFIGURATION
@@ -16,162 +29,168 @@ st.set_page_config(
 load_css()
 
 # ==========================================================
-# HEADER
+# SESSION STATE
 # ==========================================================
 
-st.title("🏗 Kent EPC Project Tracker")
+if "page" not in st.session_state:
+    st.session_state.page = "Dashboard"
 
-st.caption(
-    "AI-Powered EPC Engineering Project Controls & Activity Management System"
-)
+# ==========================================================
+# SIDEBAR
+# ==========================================================
+
+with st.sidebar:
+
+    st.markdown(
+        """
+        # 📋 Kent EPC Tracker
+        """
+    )
+
+    st.caption(
+        "Engineering Project Controls"
+    )
+
+    st.divider()
+
+    st.subheader("Navigation")
+
+    if st.button(
+        "🏠 Dashboard",
+        use_container_width=True
+    ):
+        st.session_state.page = "Dashboard"
+
+    if st.button(
+        "📋 Activity Manager",
+        use_container_width=True
+    ):
+        st.session_state.page = "Activity Manager"
+
+    if st.button(
+        "📊 Analytics",
+        use_container_width=True
+    ):
+        st.session_state.page = "Analytics"
+
+    st.divider()
+
+    st.subheader("Application")
+
+    st.caption("Kent PLC")
+
+    st.caption("Version 2.0")
+
+    st.caption(
+        datetime.now().strftime("%d %b %Y")
+    )
+
+# ==========================================================
+# PAGE ROUTER
+# ==========================================================
+
+page = st.session_state.page
+# ==========================================================
+# GLOBAL HEADER
+# ==========================================================
+
+header_left, header_right = st.columns([5, 1])
+
+with header_left:
+
+    st.title("🏗 Kent EPC Project Tracker")
+
+    st.caption(
+        "Executive Project Controls Dashboard"
+    )
+
+with header_right:
+
+    st.metric(
+        "Refresh",
+        datetime.now().strftime("%H:%M")
+    )
 
 st.divider()
 
 # ==========================================================
-# WELCOME SECTION
+# PAGE ROUTER
 # ==========================================================
 
-left, right = st.columns([2, 1])
+if page == "Dashboard":
 
-with left:
+    dashboard_page()
 
-    st.markdown(
-        """
-### Welcome
+elif page == "Activity Manager":
 
-This application is designed to help engineering teams manage:
+    activity_page()
 
-- 📋 Engineering Activities
-- 📊 Project Analytics
-- 🏗 Project Monitoring
-- 👷 Resource Allocation
-- 📈 Executive Reporting
-- 📅 Schedule Tracking
+elif page == "Analytics":
 
-Use the navigation panel on the left to access each module.
-"""
-    )
+    analytics_page()
 
-with right:
+# ==========================================================
+# FUTURE MODULES
+# ==========================================================
 
-    st.success("🟢 Google Sheets Connected")
+elif page == "Settings":
+
+    st.title("⚙ Settings")
 
     st.info(
-        f"Last Opened\n\n{datetime.now().strftime('%d %b %Y %H:%M')}"
+        "Settings module will be available in the next version."
     )
 
-st.divider()
+elif page == "About":
 
-# ==========================================================
-# MODULES
-# ==========================================================
-
-st.subheader("📦 Available Modules")
-
-col1, col2 = st.columns(2)
-
-with col1:
+    st.title("ℹ About")
 
     st.markdown(
         """
-### 📊 Dashboard
+### Kent EPC Project Tracker
 
-Executive project overview
+Version **2.0**
 
-- KPI Dashboard
-- Project Health
-- Schedule Monitoring
-- Progress Overview
+Developed for:
+
+- Engineering Project Controls
+- EPC Activity Tracking
+- Portfolio Analytics
+- Engineering Resource Management
+
+Backend
+
+- Google Sheets
+
+Framework
+
+- Streamlit
+
+Visualization
+
+- Plotly
+
+Developer
+
+Electrical Engineering Digitalisation Initiative
 """
     )
-
-    st.markdown(
-        """
-### 📋 Activity Manager
-
-Manage engineering activities
-
-- Activity Register
-- Add Activities
-- Search & Filter
-- Export Data
-"""
-    )
-
-    st.markdown(
-        """
-### 📈 Analytics
-
-Interactive project analytics
-
-- Charts
-- Trends
-- Workload Analysis
-- Executive Insights
-"""
-    )
-
-with col2:
-
-    st.markdown(
-        """
-### 🚧 Coming Soon
-
-- 🏗 Project Register
-- 👷 Employee Management
-- 📄 Reports
-- 📅 Gantt Chart
-- ⚠ Risk Register
-- 📁 Document Register
-"""
-    )
-
-st.divider()
-
-# ==========================================================
-# SYSTEM INFORMATION
-# ==========================================================
-
-st.subheader("ℹ System Information")
-
-info1, info2, info3 = st.columns(3)
-
-with info1:
-
-    st.metric(
-        "Application",
-        "Kent EPC Tracker"
-    )
-
-with info2:
-
-    st.metric(
-        "Version",
-        "2.0"
-    )
-
-with info3:
-
-    st.metric(
-        "Backend",
-        "Google Sheets"
-    )
-
-st.divider()
 
 # ==========================================================
 # FOOTER
 # ==========================================================
 
-left, right = st.columns([3, 1])
+st.divider()
 
-with left:
+footer1, footer2 = st.columns([3, 1])
+
+with footer1:
 
     st.caption(
-        "Developed for Kent PLC • Electrical Engineering Digitalisation Initiative"
+        "Kent PLC • EPC Project Controls Platform • Version 2.0"
     )
 
-with right:
+with footer2:
 
     st.caption(
         datetime.now().strftime("%d %b %Y")
