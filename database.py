@@ -106,7 +106,7 @@ def add_activity(activity):
         activity["Progress"],
         activity["Status"],
         activity["Remarks"],
-        datetime.now().strftime("%d-%b-%Y %H:%M")
+        datetime.now().strftime("%d-%b-%Y")
     ])
     get_tasks.clear()
 # ----------------------------------------------------
