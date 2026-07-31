@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+
 from datetime import datetime
 
 from components.styles import load_css
@@ -12,7 +13,7 @@ from database import (
 )
 
 # ===========================================================
-# CONSTANTS
+# MASTER DATA
 # ===========================================================
 
 DISCIPLINES = [
@@ -23,20 +24,103 @@ DISCIPLINES = [
     "Process"
 ]
 
+PACKAGES = [
+
+    "P&ID",
+
+    "Line List",
+
+    "Equipment Layout",
+
+    "Equipment Datasheet",
+
+    "Cable Schedule",
+
+    "Single Line Diagram",
+
+    "Cause & Effect",
+
+    "Fire Proofing",
+
+    "Hazardous Area",
+
+    "Load List",
+
+    "Instrument Index",
+
+    "MTO",
+
+    "Others"
+
+]
+
+PHASES = [
+
+    "Development",
+
+    "IDC",
+
+    "LSO",
+
+    "IFR",
+
+    "IFR Review",
+
+    "Comments Incorporation",
+
+    "IFC",
+
+    "Issued",
+
+    "Completed"
+
+]
+
 PRIORITIES = [
+
     "Critical",
+
     "High",
+
     "Medium",
+
     "Low"
+
 ]
 
 STATUS = [
+
     "Not Started",
+
     "In Progress",
+
     "Waiting for Review",
+
     "Completed",
+
     "On Hold"
+
 ]
+
+
+# ===========================================================
+# AUTO STATUS
+# ===========================================================
+
+def get_status(progress):
+
+    if progress == 0:
+
+        return "Not Started"
+
+    elif progress == 100:
+
+        return "Completed"
+
+    else:
+
+        return "In Progress"
+
 
 # ===========================================================
 # PAGE
@@ -50,17 +134,46 @@ def show():
     # HEADER
     # =======================================================
 
-    st.title("📋 Activity Manager")
+    st.title("📘 Engineering Activity Register")
 
     st.caption(
-        "Manage EPC engineering activities, assignments and progress."
+        "Engineering Deliverables & Activity Tracking"
     )
+
+    info1, info2, info3 = st.columns([2,2,1])
+
+    with info1:
+
+        st.info(
+            "Engineering Project Controls"
+        )
+
+    with info2:
+
+        st.success(
+            "Google Sheets Connected"
+        )
+
+    with info3:
+
+        st.metric(
+            "Updated",
+            datetime.now().strftime("%H:%M")
+        )
+
+    st.divider()
+
+    # =======================================================
+    # LOAD DATA
+    # =======================================================
 
     tasks = get_tasks()
 
     if tasks.empty:
 
-        st.warning("No activities available.")
+        st.warning(
+            "No activities available."
+        )
 
         st.stop()
 
@@ -78,7 +191,7 @@ def show():
         errors="coerce"
     )
 
-    today = pd.Timestamp.today()
+    today = pd.Timestamp.today().normalize()
 
     total = len(tasks)
 
@@ -86,7 +199,7 @@ def show():
         tasks["Status"] == "Completed"
     ).sum()
 
-    in_progress = (
+    running = (
         tasks["Status"] == "In Progress"
     ).sum()
 
@@ -94,127 +207,163 @@ def show():
         tasks["Status"] == "Not Started"
     ).sum()
 
-    overdue = (
+    overdue = len(
 
-        (
+        tasks[
 
-            tasks["Planned Finish"] < today
+            (
+                tasks["Planned Finish"]
+                < today
+            )
 
-        )
+            &
 
-        &
+            (
+                tasks["Status"]
+                != "Completed"
+            )
 
-        (
+        ]
 
-            tasks["Status"] != "Completed"
-
-        )
-
-    ).sum()
+    )
 
     # =======================================================
-    # KPI DASHBOARD
+    # KPI STRIP
     # =======================================================
 
-    c1, c2, c3, c4 = st.columns(4)
+    st.subheader("Engineering Portfolio")
 
-    with c1:
+    row1 = st.columns(4)
+
+    with row1[0]:
 
         st.metric(
-            "📋 Total Activities",
+            "Activities",
             total
         )
 
-    with c2:
+    with row1[1]:
 
         st.metric(
-            "🟢 Completed",
+            "Completed",
             completed
         )
 
-    with c3:
+    with row1[2]:
 
         st.metric(
-            "🟡 In Progress",
-            in_progress
+            "Running",
+            running
         )
 
-    with c4:
+    with row1[3]:
 
         st.metric(
-            "🔴 Overdue",
+            "Overdue",
             overdue
         )
 
     st.divider()
 
     # =======================================================
-    # TABS
+    # MAIN TABS
     # =======================================================
 
-    tab1, tab2 = st.tabs(
+    register_tab, add_tab = st.tabs(
 
         [
 
-            "📄 Activity Register",
+            "📑 Engineering Register",
 
-            "➕ Add Activity"
+            "➕ Add Engineering Activity"
 
         ]
 
     )
-    with tab1:
-
-        st.subheader("📄 Activity Register")
-
         # =======================================================
+    # ENGINEERING REGISTER
+    # =======================================================
+
+    with register_tab:
+
+        st.subheader("Engineering Deliverables Register")
+
+        # ===================================================
         # SEARCH
-        # =======================================================
+        # ===================================================
 
         search = st.text_input(
-            "🔍 Search Activities",
-            placeholder="Search by Activity ID, Activity Name, Project, Lead or Assigned To..."
+            "🔍 Search",
+            placeholder="Search Activity ID, Activity Name, Project, Package or Engineer..."
         )
 
-        # =======================================================
+        # ===================================================
         # FILTERS
-        # =======================================================
+        # ===================================================
 
-        filter1, filter2, filter3, filter4 = st.columns(4)
+        f1, f2, f3 = st.columns(3)
 
-        with filter1:
+        with f1:
 
             project_filter = st.selectbox(
                 "Project",
-                ["All"] + sorted(tasks["Project"].dropna().unique().tolist())
+                ["All"] +
+                sorted(
+                    tasks["Project"]
+                    .dropna()
+                    .unique()
+                    .tolist()
+                )
             )
 
-        with filter2:
+        with f2:
 
             discipline_filter = st.selectbox(
                 "Discipline",
-                ["All"] + sorted(tasks["Discipline"].dropna().unique().tolist())
+                ["All"] + DISCIPLINES
             )
 
-        with filter3:
+        with f3:
 
             status_filter = st.selectbox(
                 "Status",
-                ["All"] + sorted(tasks["Status"].dropna().unique().tolist())
+                ["All"] + STATUS
             )
 
-        with filter4:
+        f4, f5, f6 = st.columns(3)
 
-            priority_filter = st.selectbox(
-                "Priority",
-                ["All"] + sorted(tasks["Priority"].dropna().unique().tolist())
+        with f4:
+
+            package_filter = st.selectbox(
+                "Package",
+                ["All"] + PACKAGES
+            )
+
+        with f5:
+
+            phase_filter = st.selectbox(
+                "Phase",
+                ["All"] + PHASES
+            )
+
+        with f6:
+
+            engineer_filter = st.selectbox(
+                "Engineer",
+                ["All"] +
+                sorted(
+                    tasks["Assigned To"]
+                    .dropna()
+                    .unique()
+                    .tolist()
+                )
             )
 
         filtered = tasks.copy()
 
-        # =======================================================
-        # APPLY SEARCH
-        # =======================================================
+        # ===================================================
+        # SEARCH
+        # ===================================================
 
         if search:
 
@@ -231,9 +380,9 @@ def show():
                 )
             ]
 
-        # =======================================================
-        # APPLY FILTERS
-        # =======================================================
+        # ===================================================
+        # FILTERS
+        # ===================================================
 
         if project_filter != "All":
 
@@ -253,78 +402,134 @@ def show():
                 filtered["Status"] == status_filter
             ]
 
-        if priority_filter != "All":
+        # ---------------------------------------------------
+        # Optional filters
+        # ---------------------------------------------------
+
+        if (
+            package_filter != "All"
+            and
+            "Package" in filtered.columns
+        ):
 
             filtered = filtered[
-                filtered["Priority"] == priority_filter
+                filtered["Package"] == package_filter
             ]
 
-        # =======================================================
-        # SUMMARY
-        # =======================================================
+        if (
+            phase_filter != "All"
+            and
+            "Phase" in filtered.columns
+        ):
 
-        left, right = st.columns([2, 1])
+            filtered = filtered[
+                filtered["Phase"] == phase_filter
+            ]
+
+        if engineer_filter != "All":
+
+            filtered = filtered[
+                filtered["Assigned To"] == engineer_filter
+            ]
+
+        st.divider()
+
+        # ===================================================
+        # REGISTER SUMMARY
+        # ===================================================
+
+        left, right = st.columns([3,1])
 
         with left:
 
             st.info(
-                f"Displaying **{len(filtered)}** of **{len(tasks)}** activities."
+                f"Displaying **{len(filtered)}** of **{len(tasks)}** engineering activities."
             )
 
         with right:
 
-            csv = filtered.to_csv(index=False).encode("utf-8")
+            csv = filtered.to_csv(
+                index=False
+            ).encode("utf-8")
 
             st.download_button(
-                "📥 Export CSV",
+
+                "📥 Export Register",
+
                 csv,
-                file_name=f"Activity_Register_{datetime.now().strftime('%Y%m%d')}.csv",
+
+                file_name=f"Engineering_Register_{datetime.now().strftime('%Y%m%d')}.csv",
+
                 mime="text/csv",
+
                 use_container_width=True
+
             )
-
-        # =======================================================
-        # TABLE
-        # =======================================================
-
-        display_columns = [
-            "Activity ID",
-            "Activity Name",
-            "Project",
-            "Discipline",
-            "Lead",
-            "Assigned To",
-            "Priority",
-            "Planned Start",
-            "Planned Finish",
-            "Progress",
-            "Status"
-        ]
-
-        available_columns = [
-            col for col in display_columns
-            if col in filtered.columns
-        ]
-
-        st.dataframe(
-            filtered[available_columns],
-            use_container_width=True,
-            hide_index=True,
-            height=550
-        )
-
-        # =======================================================
-        # QUICK SUMMARY
-        # =======================================================
 
         st.divider()
 
-        s1, s2, s3 = st.columns(3)
+        # ===================================================
+        # ENGINEERING REGISTER TABLE
+        # ===================================================
+
+        preferred_columns = [
+
+            "Activity ID",
+
+            "Activity Name",
+
+            "Project",
+
+            "Discipline",
+
+            "Package",
+
+            "Phase",
+
+            "Assigned To",
+
+            "Planned Finish",
+
+            "Progress",
+
+            "Status"
+
+        ]
+
+        available_columns = [
+
+            column
+
+            for column in preferred_columns
+
+            if column in filtered.columns
+
+        ]
+
+        st.dataframe(
+
+            filtered[available_columns],
+
+            use_container_width=True,
+
+            hide_index=True,
+
+            height=550
+
+        )
+
+        st.divider()
+
+        # ===================================================
+        # REGISTER STATISTICS
+        # ===================================================
+
+        s1, s2, s3, s4 = st.columns(4)
 
         with s1:
 
             st.metric(
-                "Displayed Activities",
+                "Activities",
                 len(filtered)
             )
 
@@ -338,52 +543,92 @@ def show():
         with s3:
 
             st.metric(
-                "Employees",
+                "Disciplines",
+                filtered["Discipline"].nunique()
+            )
+
+        with s4:
+
+            st.metric(
+                "Engineers",
                 filtered["Assigned To"].nunique()
             )
-    with tab2:
 
-        st.subheader("➕ Add New Activity")
+        st.divider()
+            # =======================================================
+    # ADD ENGINEERING ACTIVITY
+    # =======================================================
+
+    with add_tab:
+
+        st.subheader("Add Engineering Activity")
 
         st.info(
-            "Complete the activity details below. Fields marked with * are mandatory."
+            "Create a new engineering deliverable or schedule activity."
         )
 
         st.divider()
 
-        # ======================================================
-        # ROW 1
-        # ======================================================
+        # ===================================================
+        # PROJECT INFORMATION
+        # ===================================================
 
-        col1, col2 = st.columns(2)
+        st.markdown("### 📁 Project Information")
 
-        with col1:
+        p1, p2 = st.columns(2)
 
-            activity_id = st.text_input(
-                "Activity ID *",
-                placeholder="e.g. ELEC-001"
-            )
-
-            activity_name = st.text_input(
-                "Activity Name *",
-                placeholder="Cable Routing Review"
-            )
+        with p1:
 
             project = st.selectbox(
                 "Project *",
                 get_project_names()
             )
 
-            category = st.text_input(
-                "Category",
-                placeholder="Engineering / Procurement / Construction"
-            )
-
-        with col2:
-
             discipline = st.selectbox(
                 "Discipline *",
                 DISCIPLINES
+            )
+
+        with p2:
+
+            package = st.selectbox(
+                "Package *",
+                PACKAGES
+            )
+
+            phase = st.selectbox(
+                "Phase *",
+                PHASES
+            )
+
+        st.divider()
+
+        # ===================================================
+        # ACTIVITY INFORMATION
+        # ===================================================
+
+        st.markdown("### 📋 Activity Information")
+
+        a1, a2 = st.columns(2)
+
+        with a1:
+
+            activity_id = st.text_input(
+                "Activity ID *",
+                placeholder="OMCC-DE-PS-1000"
+            )
+
+            activity_name = st.text_input(
+                "Activity Name *",
+                placeholder="P&ID Construction - Development"
+            )
+
+        with a2:
+
+            duration = st.number_input(
+                "Duration (Days)",
+                min_value=1,
+                value=10
             )
 
             priority = st.selectbox(
@@ -391,75 +636,107 @@ def show():
                 PRIORITIES
             )
 
-            status = st.selectbox(
-                "Status",
-                STATUS
-            )
-
-            progress = st.slider(
-                "Progress (%)",
-                min_value=0,
-                max_value=100,
-                value=0
-            )
-
         st.divider()
 
-        # ======================================================
-        # ROW 2
-        # ======================================================
+        # ===================================================
+        # PLANNING INFORMATION
+        # ===================================================
 
-        col3, col4 = st.columns(2)
+        st.markdown("### 📅 Planning Information")
 
-        with col3:
+        d1, d2 = st.columns(2)
 
-            lead = st.selectbox(
-                "Lead Engineer *",
-                get_employee_names()
-            )
+        with d1:
 
-            assigned = st.selectbox(
-                "Assigned To *",
-                get_employee_names()
-            )
-
-        with col4:
-
-            start = st.date_input(
+            planned_start = st.date_input(
                 "Planned Start"
             )
 
-            finish = st.date_input(
+            predecessor = st.text_input(
+                "Predecessor",
+                placeholder="OMCC-DE-PS-0990"
+            )
+
+        with d2:
+
+            planned_finish = st.date_input(
                 "Planned Finish"
+            )
+
+            successor = st.text_input(
+                "Successor (Optional)"
             )
 
         st.divider()
 
+        # ===================================================
+        # ENGINEERING ASSIGNMENT
+        # ===================================================
+
+        st.markdown("### 👨‍💼 Engineering Assignment")
+
+        e1, e2 = st.columns(2)
+
+        with e1:
+
+            lead = st.selectbox(
+                "Lead Engineer",
+                get_employee_names()
+            )
+
+        with e2:
+
+            assigned = st.selectbox(
+                "Assigned Engineer",
+                get_employee_names()
+            )
+
+        st.divider()
+
+        # ===================================================
+        # PROGRESS
+        # ===================================================
+
+        st.markdown("### 📊 Progress")
+
+        progress = st.slider(
+            "Progress (%)",
+            0,
+            100,
+            0
+        )
+
+        status = get_status(progress)
+
+        st.success(
+            f"Current Status : **{status}**"
+        )
+
         remarks = st.text_area(
-            "Remarks",
+            "Engineering Remarks",
             height=120,
-            placeholder="Enter activity notes, dependencies, risks or comments..."
+            placeholder="Design comments, assumptions, client remarks, IFC notes..."
         )
 
         st.divider()
 
-        # ======================================================
+        # ===================================================
         # VALIDATION
-        # ======================================================
+        # ===================================================
 
         error = False
 
-        if finish < start:
+        if planned_finish < planned_start:
 
             st.error(
-                "Planned Finish cannot be earlier than Planned Start."
+                "Finish date cannot be before start date."
             )
 
             error = True
 
         if activity_id.strip() == "":
 
-            st.warning(
+            st.error(
                 "Activity ID is mandatory."
             )
 
@@ -467,7 +744,7 @@ def show():
 
         if activity_name.strip() == "":
 
-            st.warning(
+            st.error(
                 "Activity Name is mandatory."
             )
 
@@ -480,12 +757,7 @@ def show():
             .tolist()
         )
 
-        duplicate = (
-            activity_id.upper()
-            in existing_ids
-        )
-
-        if duplicate:
+        if activity_id.upper() in existing_ids:
 
             st.error(
                 "Activity ID already exists."
@@ -495,166 +767,83 @@ def show():
 
         st.divider()
 
-        # ======================================================
-        # PREVIEW
-        # ======================================================
+        # ===================================================
+        # ENGINEERING PREVIEW
+        # ===================================================
 
         with st.expander(
-            "👁 Preview Activity",
+            "📄 Activity Preview",
             expanded=False
         ):
 
             preview = pd.DataFrame({
 
                 "Field":[
-                    "Activity ID",
-                    "Activity Name",
+
                     "Project",
-                    "Category",
+
                     "Discipline",
+
+                    "Package",
+
+                    "Phase",
+
+                    "Activity ID",
+
+                    "Activity",
+
+                    "Duration",
+
                     "Lead",
-                    "Assigned To",
+
+                    "Assigned",
+
                     "Priority",
-                    "Status",
+
                     "Progress",
-                    "Planned Start",
-                    "Planned Finish"
+
+                    "Status"
+
                 ],
 
                 "Value":[
-                    activity_id,
-                    activity_name,
+
                     project,
-                    category,
+
                     discipline,
+
+                    package,
+
+                    phase,
+
+                    activity_id,
+
+                    activity_name,
+
+                    duration,
+
                     lead,
+
                     assigned,
+
                     priority,
-                    status,
-                    f"{progress} %",
-                    start,
-                    finish
+
+                    f"{progress}%",
+
+                    status
+
                 ]
 
             })
 
             st.dataframe(
+
                 preview,
+
                 use_container_width=True,
+
                 hide_index=True
+
             )
 
         st.divider()
-        # ======================================================
-        # ACTIVITY INSIGHTS
-        # ======================================================
-
-        st.subheader("📊 Activity Insights")
-
-        insight1, insight2, insight3 = st.columns(3)
-
-        with insight1:
-
-            st.metric(
-                "Current Progress",
-                f"{progress}%"
-            )
-
-        with insight2:
-
-            duration = (finish - start).days
-
-            st.metric(
-                "Planned Duration",
-                f"{duration} Days"
-            )
-
-        with insight3:
-
-            st.metric(
-                "Selected Priority",
-                priority
-            )
-
-        if progress == 100:
-
-            st.success("🟢 Activity will be created as Completed.")
-
-        elif progress >= 75:
-
-            st.info("🔵 Activity is nearing completion.")
-
-        elif progress >= 40:
-
-            st.warning("🟡 Activity is currently in progress.")
-
-        else:
-
-            st.error("🔴 Activity has just started or is pending.")
-
-        st.divider()
-
-        # ======================================================
-        # SAVE BUTTON
-        # ======================================================
-
-        if st.button(
-            "💾 Save Activity",
-            use_container_width=True,
-            type="primary"
-        ):
-
-            if error:
-
-                st.stop()
-
-            add_activity({
-
-                "Activity_ID": activity_id,
-
-                "Activity_Name": activity_name,
-
-                "Project": project,
-
-                "Category": category,
-
-                "Discipline": discipline,
-
-                "Lead": lead,
-
-                "Assigned_To": assigned,
-
-                "Priority": priority,
-
-                "Planned_Start": str(start),
-
-                "Planned_Finish": str(finish),
-
-                "Progress": progress,
-
-                "Status": status,
-
-                "Remarks": remarks
-
-            })
-
-            st.success(
-                f"""
-✅ Activity **{activity_id}** has been successfully added.
-
-Project : {project}
-
-Assigned To : {assigned}
-"""
-            )
-
-            st.toast(
-                "Activity added successfully.",
-                icon="✅"
-            )
-
-            st.balloons()
-
-            st.cache_data.clear()
-
-            st.rerun()
